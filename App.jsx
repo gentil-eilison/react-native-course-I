@@ -1,11 +1,21 @@
 import { useState } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 import GoalItem from './components/GoalItem';
 import GoalInput from './components/Goalnput';
 
 export default function App() {
+  const [modalIsVisible, setModalIsVisible] = useState(false)
   const [courseGoals, setCourseGoals] = useState([])
+  
+  function startAddGoalHandler() {
+    setModalIsVisible(true)
+  }
+
+  function endAddGoalHandler() {
+    setModalIsVisible(false)
+  }
 
   function addGoalHandler(enteredGoalText) {
     setCourseGoals((currentCourseGoals) => {
@@ -14,6 +24,7 @@ export default function App() {
         { text: enteredGoalText, id: Math.random().toString() }
       ]
     })
+    endAddGoalHandler()
   }
 
   function deleteGoalHandler(id) {
@@ -22,21 +33,26 @@ export default function App() {
     })
   }
 
+
   return (
-    <View style={styles.appContainer}>
-      <GoalInput onAddGoal={addGoalHandler}/>
-      <View style={styles.goalsContainer}>
-        <FlatList 
-          data={courseGoals}
-          renderItem={(itemData) => {
-            return <GoalItem onDeleteGoal={deleteGoalHandler} id={itemData.item.id} text={itemData.item.text}/>
-          }}
-          keyExtractor={(item, index) => {
-            return item.id;
-          }}
-          />
+    <>
+      <StatusBar style='light'/>
+      <View style={styles.appContainer}>
+        <Button onPress={startAddGoalHandler} title='Add New Goal' color='#a065ec'/>
+        <GoalInput onEndAddGoal={endAddGoalHandler} visible={modalIsVisible}  onAddGoal={addGoalHandler}/>
+        <View style={styles.goalsContainer}>
+          <FlatList 
+            data={courseGoals}
+            renderItem={(itemData) => {
+              return <GoalItem onDeleteGoal={deleteGoalHandler} id={itemData.item.id} text={itemData.item.text}/>
+            }}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+            />
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 
@@ -44,7 +60,7 @@ const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
     paddingTop: 50,
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
   },
 
   goalsContainer: {
